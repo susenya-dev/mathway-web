@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Авторизация</h2>
+
+<form method="POST">
+    <div class="mb-3">
+        <label>Логин</label>
+        <input type="text" name="username" class="form-control" required value="{{ username or '' }}">
+    </div>
+
+    <div class="mb-3">
+        <label>Пароль</label>
+        <input type="password" name="password" class="form-control" required>
+    </div>
+
+    <button class="btn btn-primary">Войти в аккаунт</button>
+</form>
+
+{% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+{% endif %}
+
+{% endblock %}

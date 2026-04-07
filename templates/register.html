@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Регистрация</h2>
+
+<form method="POST">
+    <div class="mb-3">
+        <label>Логин</label>
+        <input type="text" name="username" class="form-control" required value="{{ username or '' }}">
+    </div>
+
+    <div class="mb-3">
+        <label>Пароль</label>
+        <input type="password" name="password" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Подтвердить пароль</label>
+        <input type="password" name="confirm_password" class="form-control" required>
+    </div>
+
+
+    <button class="btn btn-primary">Зарегистрироваться</button>
+</form>
+
+{% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+{% endif %}
+
+{% endblock %}
