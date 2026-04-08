@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Тест</h2>
+{% for task in tasks %}
+    <div class="card p-3 mb-3">
+        <p><b>Задание {{ loop.index }}</b></p>
+        <p>{{ task.question }}</p>
+        {% if task.image_url %}
+            <img src="{{ url_for('static', filename=task.image_url) }}" class="img-fluid w-50">
+        {% endif %}
+
+        <input type="text" class="form-control" placeholder="Введите ответ">
+
+    </div>
+{% endfor %}
+
+{% endblock %}

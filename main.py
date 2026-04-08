@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for
-from models import db, User
+from flask import Flask, render_template, request, redirect, url_for, jsonify
+from models import db, User, Task
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
@@ -14,9 +14,11 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
 
 @app.route('/')
 def home():
@@ -64,5 +66,28 @@ def login():
 
     return render_template('login.html')
 
+
+@app.route('/test')
+def test():
+    tasks = Task.query.all()
+    return render_template('test.html', tasks=tasks)
+
+
+@app.route('/api/tasks')
+def api_tasks():
+    tasks = Task.query.all()
+
+    result = []
+    for t in tasks:
+        result.append({
+            'id': t.id,
+            'question': t.question,
+            'topic': t.topic,
+            'image_url': t.image_url
+        })
+
+    return jsonify(result)
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
