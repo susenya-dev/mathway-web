@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from models import db, User, Task
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, login_user
 
 app = Flask(__name__)
 
@@ -22,8 +22,7 @@ def load_user(user_id):
 
 @app.route('/')
 def home():
-    return "Главная страница"
-
+    return render_template('index.html', topics=[1, 2])
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -67,11 +66,15 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/test')
-def test():
-    tasks = Task.query.all()
-    return render_template('test.html', tasks=tasks)
+# @app.route('/test')
+# def test():
+#     tasks = Task.query.all()
+#     return render_template('test.html', tasks=tasks)
 
+@app.route('/test/<int:topic>')
+def test(topic):
+    tasks = Task.query.filter_by(topic=topic).all()
+    return render_template('test.html', tasks=tasks, topic=topic)
 
 @app.route('/api/tasks')
 def api_tasks():
@@ -88,6 +91,29 @@ def api_tasks():
 
     return jsonify(result)
 
+@app.route('/check/<int:topic>', methods=['POST'])
+def check(topic):
+    tasks = Task.query.filter_by(topic=topic).all()
+
+    i = 0
+    res = []
+
+    for task in tasks:
+        user_answer = request.form.get(f"answer_{task.id}")
+
+        if user_answer:
+            user_answer = user_answer.strip()
+
+        correct = user_answer.replace(",", ".") == task.answer
+        if correct:
+            i += 1
+        res.append({
+            'question': task.question,
+            'user_answer': user_answer,
+            'correct_answer': task.answer,
+            'is_correct': correct
+        })
+    return render_template('result.html', score=i, results=res)
 
 if __name__ == '__main__':
     app.run()

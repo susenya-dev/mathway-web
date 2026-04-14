@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Результат: {{ score }}</h2>
+
+{% for r in results %}
+    <div class="card p-3 mb-2">
+
+        <p>{{ r.question }}</p>
+
+        <p>Ответ: {{ r.user_answer }}</p>
+        <p>Правильный ответ: {{ r.correct_answer }}</p>
+
+        {% if r.is_correct %}
+            <p style="color: green;">😎 Верно</p>
+        {% else %}
+            <p style="color: red;">🤮 Ошибка</p>
+        {% endif %}
+
+    </div>
+{% endfor %}
+
+{% endblock %}
