@@ -91,6 +91,57 @@ def api_tasks():
 
     return jsonify(result)
 
+
+@app.route('/variant/<int:var_num>')
+def variant(var_num):
+    tasks_topic1 = Task.query.filter_by(topic=1).order_by(Task.id).all()
+    tasks_topic2 = Task.query.filter_by(topic=2).order_by(Task.id).all()
+
+    idx1 = (var_num - 1) % len(tasks_topic1)
+    idx2 = (var_num - 1) % len(tasks_topic2)
+
+    task1 = tasks_topic1[idx1]
+    task2 = tasks_topic2[idx2]
+
+    tasks = [task1, task2]
+
+    return render_template('variant.html', tasks=tasks, var_num=var_num)
+
+
+@app.route('/check_variant/<int:var_num>', methods=['POST'])
+def check_variant(var_num):
+    tasks_topic1 = Task.query.filter_by(topic=1).order_by(Task.id).all()
+    tasks_topic2 = Task.query.filter_by(topic=2).order_by(Task.id).all()
+
+    idx1 = (var_num - 1) % len(tasks_topic1)
+    idx2 = (var_num - 1) % len(tasks_topic2)
+
+    task1 = tasks_topic1[idx1]
+    task2 = tasks_topic2[idx2]
+    tasks = [task1, task2]
+
+    correct_count = 0
+    results = []
+
+    for task in tasks:
+        user_answer = request.form.get(f"answer_{task.id}")
+        if user_answer:
+            user_answer = user_answer.strip()
+
+        is_correct = user_answer.replace(",", ".") == task.answer
+        if is_correct:
+            correct_count += 1
+
+        results.append({
+            'question': task.question,
+            'user_answer': user_answer,
+            'correct_answer': task.answer,
+            'is_correct': is_correct
+        })
+
+    return render_template('result.html', score=correct_count, results=results,
+                           total=len(tasks), variant_id=var_num)
+
 @app.route('/check/<int:topic>', methods=['POST'])
 def check(topic):
     tasks = Task.query.filter_by(topic=topic).all()
