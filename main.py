@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 from models import db, User, Task
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user
-
+from fnmatch import fnmatch
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
@@ -15,6 +15,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -22,29 +23,33 @@ def load_user(user_id):
 
 @app.route('/')
 def home():
-    return render_template('index.html', topics=[1, 2])
+    return render_template("index.html", topics=[1, 2])
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        email = request.form["email"]
+        confirm_password = request.form["confirm_password"]
 
         if User.query.filter_by(username=username).first():
-            return render_template('register.html', error="Пользователь уже существует", username=username)
+            return render_template("register.html", error="Пользователь уже существует", username=username)
         if confirm_password != password:
-            return render_template('register.html', error="Пароли не совпадают", username=username)
+            return render_template("register.html", error="Пароли не совпадают", username=username)
         if len(password) < 6:
-            return render_template('register.html', error="Пароль слишком короткий", username=username)
-
+            return render_template("register.htm", error="Пароль слишком короткий", username=username)
+        if User.query.filter_by(email=email).first():
+            return render_template("register.html", error="Электронная почта уже занята", username=username)
+        if not fnmatch(email, "*@*.*"):
+            return render_template("register.html", error="Неправильная запись почты", username=username)
         hashed_password = generate_password_hash(password)
 
-        user = User(username=username, password=hashed_password)
+        user = User(username=username, password=hashed_password, email=email)
         db.session.add(user)
         db.session.commit()
 
-        return redirect(url_for('home'))
+        return redirect(url_for("home"))
 
     return render_template('register.html')
 
@@ -167,4 +172,4 @@ def check(topic):
     return render_template('result.html', score=i, results=res)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=8080)

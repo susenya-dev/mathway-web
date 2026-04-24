@@ -5,6 +5,11 @@
 
 <form method="POST">
     <div class="mb-3">
+        <label>Электронная почта</label>
+        <input type="text" name="email" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
         <label>Логин</label>
         <input type="text" name="username" class="form-control" required value="{{ username or '' }}">
     </div>
