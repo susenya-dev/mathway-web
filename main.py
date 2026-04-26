@@ -38,7 +38,7 @@ def register():
         if confirm_password != password:
             return render_template("register.html", error="Пароли не совпадают", username=username)
         if len(password) < 6:
-            return render_template("register.htm", error="Пароль слишком короткий", username=username)
+            return render_template("register.html", error="Пароль слишком короткий", username=username)
         if User.query.filter_by(email=email).first():
             return render_template("register.html", error="Электронная почта уже занята", username=username)
         if not fnmatch(email, "*@*.*"):
