@@ -3,6 +3,7 @@ from models import db, User, Task
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user
 from fnmatch import fnmatch
+
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
@@ -15,7 +16,6 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 
-
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -23,7 +23,8 @@ def load_user(user_id):
 
 @app.route('/')
 def home():
-    return render_template("index.html", topics=[1, 2])
+    return render_template("index.html", topics=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -81,6 +82,7 @@ def test(topic):
     tasks = Task.query.filter_by(topic=topic).all()
     return render_template('test.html', tasks=tasks, topic=topic)
 
+
 @app.route('/api/tasks')
 def api_tasks():
     tasks = Task.query.all()
@@ -99,31 +101,59 @@ def api_tasks():
 
 @app.route('/variant/<int:var_num>')
 def variant(var_num):
-    tasks_topic1 = Task.query.filter_by(topic=1).order_by(Task.id).all()
-    tasks_topic2 = Task.query.filter_by(topic=2).order_by(Task.id).all()
+    """
+    Создание варианта
+    :param var_num:
+    :return:
+    """
+    # tasks_topic1 = Task.query.filter_by(topic=1).order_by(Task.id).all()
+    # tasks_topic2 = Task.query.filter_by(topic=2).order_by(Task.id).all()
+    # tasks_topic3 = Task.query.filter_by(topic=3).order_by(Task.id).all()
+    #
+    # idx1 = (var_num - 1) % len(tasks_topic1)
+    # idx2 = (var_num - 1) % len(tasks_topic2)
+    # idx3 = (var_num - 1) % len(tasks_topic3)
+    #
+    # task1 = tasks_topic1[idx1]
+    # task2 = tasks_topic2[idx2]
+    # task3 = tasks_topic3[idx3]
 
-    idx1 = (var_num - 1) % len(tasks_topic1)
-    idx2 = (var_num - 1) % len(tasks_topic2)
-
-    task1 = tasks_topic1[idx1]
-    task2 = tasks_topic2[idx2]
-
-    tasks = [task1, task2]
+    tasks = []
+    for i in range(1, 11):
+        tasks_topic = Task.query.filter_by(topic=i).order_by(Task.id).all()
+        idx = (var_num - 1) % len(tasks_topic)
+        task = tasks_topic[idx]
+        tasks.append(task)
 
     return render_template('variant.html', tasks=tasks, var_num=var_num)
 
 
 @app.route('/check_variant/<int:var_num>', methods=['POST'])
 def check_variant(var_num):
-    tasks_topic1 = Task.query.filter_by(topic=1).order_by(Task.id).all()
-    tasks_topic2 = Task.query.filter_by(topic=2).order_by(Task.id).all()
-
-    idx1 = (var_num - 1) % len(tasks_topic1)
-    idx2 = (var_num - 1) % len(tasks_topic2)
-
-    task1 = tasks_topic1[idx1]
-    task2 = tasks_topic2[idx2]
-    tasks = [task1, task2]
+    """
+    варианты ответ
+    :param var_num:
+    :return:
+    """
+    # tasks_topic1 = Task.query.filter_by(topic=1).order_by(Task.id).all()
+    # tasks_topic2 = Task.query.filter_by(topic=2).order_by(Task.id).all()
+    # tasks_topic3 = Task.query.filter_by(topic=3).order_by(Task.id).all()
+    #
+    # idx1 = (var_num - 1) % len(tasks_topic1)
+    # idx2 = (var_num - 1) % len(tasks_topic2)
+    # idx3 = (var_num - 1) % len(tasks_topic3)
+    #
+    # task1 = tasks_topic1[idx1]
+    # task2 = tasks_topic2[idx2]
+    # task3 = tasks_topic3[idx3]
+    #
+    # tasks = [task1, task2, task3]
+    tasks = []
+    for i in range(1, 11):
+        tasks_topic = Task.query.filter_by(topic=i).order_by(Task.id).all()
+        idx = (var_num - 1) % len(tasks_topic)
+        task = tasks_topic[idx]
+        tasks.append(task)
 
     correct_count = 0
     results = []
@@ -146,6 +176,7 @@ def check_variant(var_num):
 
     return render_template('result.html', score=correct_count, results=results,
                            total=len(tasks), variant_id=var_num)
+
 
 @app.route('/check/<int:topic>', methods=['POST'])
 def check(topic):
@@ -170,6 +201,7 @@ def check(topic):
             'is_correct': correct
         })
     return render_template('result.html', score=i, results=res)
+
 
 if __name__ == '__main__':
     app.run(port=8080)
