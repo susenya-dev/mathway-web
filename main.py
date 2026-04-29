@@ -193,15 +193,19 @@ def check_variant(var_num):
             'is_correct': is_correct
         })
 
+    current_user.count_task += correct_count
+    db.session.commit()
+
     return render_template('result.html', score=correct_count, results=results,
                            total=len(tasks), variant_id=var_num)
 
 
 @app.route('/check/<int:topic>', methods=['POST'])
+@login_required
 def check(topic):
     tasks = Task.query.filter_by(topic=topic).all()
 
-    i = 0
+    correct_count = 0
     res = []
 
     for task in tasks:
@@ -212,15 +216,20 @@ def check(topic):
 
         correct = user_answer.replace(",", ".") == task.answer
         if correct:
-            i += 1
+            correct_count += 1
+
         res.append({
             'question': task.question,
             'user_answer': user_answer,
             'correct_answer': task.answer,
             'is_correct': correct
         })
-    return render_template('result.html', score=i, results=res)
 
+
+    current_user.count_task += correct_count
+    db.session.commit()
+
+    return render_template('result.html', score=correct_count, results=res)
 
 if __name__ == '__main__':
     app.run(port=8080)
