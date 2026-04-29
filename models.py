@@ -8,6 +8,8 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    solved_var = db.Column(db.Integer, nullable=False, default=0)
+    avatar = db.Column(db.String(200), nullable=True)
     # status = db.Column(db.Integer,)
 
 
