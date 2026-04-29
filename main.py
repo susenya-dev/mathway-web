@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from models import db, User, Task
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, login_user
+from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from fnmatch import fnmatch
+
+import uuid
+import os
 
 app = Flask(__name__)
 
@@ -18,12 +21,52 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return User.query.get(int(user_id)) 
 
 
 @app.route('/')
 def home():
     return render_template("index.html", topics=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+
+
+@app.route('/profile')
+def profile():
+    """Шаблон профиля"""
+    return render_template("profile.html")
+
+
+@app.route('/logout')
+def logout():
+    """разлогин"""
+    logout_user()
+    return redirect(url_for('login'))
+
+
+@app.route('/upload_avatar', methods=['POST'])
+@login_required
+def upload_avatar():
+    """Сохранение аватарок в бд в профиль"""
+    file = request.files['avatar']
+
+    # пользователь
+    user = User.query.get(current_user.id)
+
+    # удаление старой авы
+    if user.avatar and user.avatar != "avatars/none_avatar.jpg":
+        old_path = os.path.join("static", user.avatar)
+        if os.path.exists(old_path):
+            os.remove(old_path)
+
+    # новый аватар с уник именем
+    ext = os.path.splitext(file.filename)[1]
+    filename = f"{uuid.uuid4().hex}{ext}"
+
+    path = f"avatars/{filename}"
+    file.save(os.path.join("static", path))
+    user.avatar = path
+    db.session.commit()
+
+    return redirect(url_for('profile'))
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -103,23 +146,11 @@ def api_tasks():
 def variant(var_num):
     """
     Создание варианта
-    :param var_num:
+    :param var_num: номер варианта
     :return:
     """
-    # tasks_topic1 = Task.query.filter_by(topic=1).order_by(Task.id).all()
-    # tasks_topic2 = Task.query.filter_by(topic=2).order_by(Task.id).all()
-    # tasks_topic3 = Task.query.filter_by(topic=3).order_by(Task.id).all()
-    #
-    # idx1 = (var_num - 1) % len(tasks_topic1)
-    # idx2 = (var_num - 1) % len(tasks_topic2)
-    # idx3 = (var_num - 1) % len(tasks_topic3)
-    #
-    # task1 = tasks_topic1[idx1]
-    # task2 = tasks_topic2[idx2]
-    # task3 = tasks_topic3[idx3]
-
     tasks = []
-    for i in range(1, 11):
+    for i in range(1, 13):
         tasks_topic = Task.query.filter_by(topic=i).order_by(Task.id).all()
         idx = (var_num - 1) % len(tasks_topic)
         task = tasks_topic[idx]
@@ -135,21 +166,9 @@ def check_variant(var_num):
     :param var_num:
     :return:
     """
-    # tasks_topic1 = Task.query.filter_by(topic=1).order_by(Task.id).all()
-    # tasks_topic2 = Task.query.filter_by(topic=2).order_by(Task.id).all()
-    # tasks_topic3 = Task.query.filter_by(topic=3).order_by(Task.id).all()
-    #
-    # idx1 = (var_num - 1) % len(tasks_topic1)
-    # idx2 = (var_num - 1) % len(tasks_topic2)
-    # idx3 = (var_num - 1) % len(tasks_topic3)
-    #
-    # task1 = tasks_topic1[idx1]
-    # task2 = tasks_topic2[idx2]
-    # task3 = tasks_topic3[idx3]
-    #
-    # tasks = [task1, task2, task3]
+
     tasks = []
-    for i in range(1, 11):
+    for i in range(1, 13):
         tasks_topic = Task.query.filter_by(topic=i).order_by(Task.id).all()
         idx = (var_num - 1) % len(tasks_topic)
         task = tasks_topic[idx]
