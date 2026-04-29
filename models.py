@@ -10,6 +10,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100), unique=True, nullable=False)
     solved_var = db.Column(db.Integer, nullable=False, default=0)
     avatar = db.Column(db.String(200), nullable=True)
+    count_task = db.Column(db.Integer, default=0)
     # status = db.Column(db.Integer,)
 
 
