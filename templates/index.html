@@ -2,7 +2,23 @@
 
 {% block content %}
 
-<h2 class="text-center mb-3">Выберите номер задания</h2>
+<div class="row mt-5">
+    <div class="col-12">
+        <h1 class="text-center mb-3">Варианты ЕГЭ</h1>
+    </div>
+
+    {% for i in range(1, 11) %}
+    <div class="col-md-2 col-sm-3 col-4 mb-2">
+        <a href="{{ url_for('variant', var_num=i) }}" class="btn btn-outline-primary w-100">
+            Вариант {{ i }}
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<h1> </h1>
+
+<h2 class="text-center mb-3">Варианты из одного типа заданий</h2>
 
 <div class="row">
 
@@ -16,18 +32,6 @@
 
 </div>
 
-<div class="row mt-5">
-    <div class="col-12">
-        <h3 class="text-center mb-3">Варианты ЕГЭ</h3>
-    </div>
 
-    {% for i in range(1, 11) %}
-    <div class="col-md-2 col-sm-3 col-4 mb-2">
-        <a href="{{ url_for('variant', var_num=i) }}" class="btn btn-outline-primary w-100">
-            Вариант {{ i }}
-        </a>
-    </div>
-    {% endfor %}
-</div>
 
 {% endblock %}

@@ -29,6 +29,9 @@ def load_user(user_id):
 def home():
     return render_template("index.html", topics=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 
+@app.route('/self_variant')
+def self_variant():
+    return render_template("self_variant.html")
 
 @app.route('/profile')
 def profile():
