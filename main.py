@@ -1,3 +1,4 @@
+import requests
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from models import db, User, Task
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -120,11 +121,20 @@ def login():
 #     tasks = Task.query.all()
 #     return render_template('test.html', tasks=tasks)
 
+# @app.route('/test/<int:topic>')
+# def test(topic):
+#     tasks = Task.query.filter_by(topic=topic).all()
+#     return render_template('test.html', tasks=tasks, topic=topic)
+
+
 @app.route('/test/<int:topic>')
 def test(topic):
-    tasks = Task.query.filter_by(topic=topic).all()
-    return render_template('test.html', tasks=tasks, topic=topic)
+    res = requests.get('http://127.0.0.1:8080/api/tasks')
+    tasks = res.json()
 
+    tasks = [t for t in tasks if int(t['topic']) == topic]
+
+    return render_template('test.html', tasks=tasks, topic=topic)
 
 @app.route('/api/tasks')
 def api_tasks():
