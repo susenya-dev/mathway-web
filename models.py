@@ -22,3 +22,13 @@ class Task(db.Model):
     topic = db.Column(db.String(10), nullable=False)
 
     image_url = db.Column(db.String(255))
+
+
+class UserTaskUp(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_name = db.Column(db.String(100))
+    variant_id = db.Column(db.String(100))
+    question = db.Column(db.Text)
+    answer = db.Column(db.String(100))
+    topic = db.Column(db.Integer)
+    image_url = db.Column(db.String(200))
