@@ -1,6 +1,6 @@
 import requests
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-from models import db, User, Task
+from models import db, User, Task, UserTaskUp
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from fnmatch import fnmatch
@@ -29,14 +29,15 @@ def load_user(user_id):
 def home():
     return render_template("index.html", topics=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
 
-@app.route('/self_variant')
-def self_variant():
-    return render_template("self_variant.html")
+# @app.route('/self_variant')
+# def self_variant():
+#     return render_template("self_variant.html")
 
 @app.route('/profile')
 def profile():
     """Шаблон профиля"""
     return render_template("profile.html")
+
 
 
 @app.route('/logout')
@@ -45,6 +46,44 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+@app.route('/self_variant', methods=['GET', 'POST'])
+@login_required
+def self_variant():
+    if request.method == 'POST':
+
+        variant_id = uuid.uuid4().hex
+
+        for i in range(1, 12):
+            question = request.form.get(f'question_{i}')
+            answer = request.form.get(f'answer_{i}')
+            file = request.files.get(f'image_{i}')
+
+            image_path = None
+            if file and file.filename:
+                ext = os.path.splitext(file.filename)[1]
+                filename = f"{uuid.uuid4().hex}{ext}"
+                path = f"uploads/{filename}"
+
+                file.save(os.path.join("static", path))
+                image_path = path
+
+            # id генерируется сам
+            task = UserTaskUp(
+                user_name=current_user.username,
+                variant_id=variant_id,
+                question=question,
+                answer=answer,
+                topic=i,
+                image_url=image_path
+            )
+
+            db.session.add(task)
+
+        db.session.commit()
+
+        return redirect(url_for('profile'))
+
+    return render_template("self_variant.html")
 
 @app.route('/upload_avatar', methods=['POST'])
 @login_required
