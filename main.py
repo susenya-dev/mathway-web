@@ -27,24 +27,30 @@ def load_user(user_id):
 
 @app.route('/')
 def home():
-    return render_template("index.html", topics=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-
-# @app.route('/self_variant')
-# def self_variant():
-#     return render_template("self_variant.html")
+    if len(UserTaskUp.query.filter_by(user_name=current_user.username).all()) > 0:
+        tasks = UserTaskUp.query.filter_by(user_name=current_user.username).all()
+        variant_ids = list(set(t.variant_id for t in tasks))
+        return render_template("index.html", topics=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                               self_vr=variant_ids)
+    else:
+        return render_template("index.html", topics=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], self_vr=[])
 
 @app.route('/profile')
 def profile():
     """Шаблон профиля"""
     return render_template("profile.html")
 
-
-
 @app.route('/logout')
 def logout():
     """разлогин"""
     logout_user()
     return redirect(url_for('login'))
+
+@app.route('/self_variant_main/<variant_id>', methods=['GET' ])
+@login_required
+def self_variant_main(variant_id):
+    tasks = UserTaskUp.query.filter_by(user_name=current_user.username, variant_id=variant_id).all()
+    return render_template('variant.html', tasks=tasks, var_num=variant_id)
 
 @app.route('/self_variant', methods=['GET', 'POST'])
 @login_required
@@ -53,7 +59,7 @@ def self_variant():
 
         variant_id = uuid.uuid4().hex
 
-        for i in range(1, 12):
+        for i in range(1, 13):
             question = request.form.get(f'question_{i}')
             answer = request.form.get(f'answer_{i}')
             file = request.files.get(f'image_{i}')

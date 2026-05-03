@@ -32,6 +32,15 @@
 
 </div>
 
-
+<h2 class="text-center mb-3">Собственные варианты</h2>
+<div class="row">
+{% for variant_id in self_vr %}
+    <div class="col-2 mb-3">
+        <a href="/self_variant_main/{{ variant_id }}" class="btn btn-outline-primary w-100">
+            {{ loop.index }}
+        </a>
+    </div>
+{% endfor %}
+</div>
 
 {% endblock %}
