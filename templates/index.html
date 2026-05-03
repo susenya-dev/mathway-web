@@ -16,31 +16,38 @@
     {% endfor %}
 </div>
 
-<h1> </h1>
+<h1></h1>
 
 <h2 class="text-center mb-3">Варианты из одного типа заданий</h2>
 
 <div class="row">
 
-{% for topic in topics %}
+    {% for topic in topics %}
     <div class="col-2 mb-3">
         <a href="/test/{{ topic }}" class="btn btn-outline-primary w-100 ">
             № {{ topic }}
         </a>
     </div>
-{% endfor %}
+    {% endfor %}
 
 </div>
 
 <h2 class="text-center mb-3">Собственные варианты</h2>
+
+<div class="card-footer text-center bg-white">
+    <a href="/self_variant" class="btn btn-outline-secondary btn-sm">
+        Создать собственный вариант
+    </a>
+</div>
+
 <div class="row">
-{% for variant_id in self_vr %}
+    {% for variant_id in self_vr %}
     <div class="col-2 mb-3">
         <a href="/self_variant_main/{{ variant_id }}" class="btn btn-outline-primary w-100">
             {{ loop.index }}
         </a>
     </div>
-{% endfor %}
+    {% endfor %}
 </div>
 
 {% endblock %}
