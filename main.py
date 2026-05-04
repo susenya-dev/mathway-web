@@ -61,7 +61,7 @@ def logout():
 @login_required
 def self_variant_main(variant_id):
     tasks = UserTaskUp.query.filter_by(user_name=current_user.username, variant_id=variant_id).all()
-    return render_template('variant.html', tasks=tasks, var_num=variant_id)
+    return render_template('variant_s.html', tasks=tasks, var_num=variant_id)
 
 
 @app.route('/self_variant', methods=['GET', 'POST'])
@@ -103,6 +103,44 @@ def self_variant():
 
     return render_template("self_variant.html")
 
+@app.route('/check_self_variant/<variant_id>', methods=['POST'])
+@login_required
+def check_self_variant(variant_id):
+    tasks = UserTaskUp.query.filter_by(
+        user_name=current_user.username,
+        variant_id=variant_id
+    ).all()
+
+    correct_count = 0
+    results = []
+
+    for task in tasks:
+        user_answer = request.form.get(f"answer_{task.id}")
+
+        if user_answer:
+            user_answer = user_answer.strip()
+
+        correct = user_answer.replace(",", ".") == task.answer
+
+        if correct:
+            correct_count += 1
+
+        results.append({
+            'question': task.question,
+            'user_answer': user_answer,
+            'correct_answer': task.answer,
+            'is_correct': correct
+        })
+
+    current_user.count_task += correct_count
+    db.session.commit()
+
+    return render_template(
+        'result.html',
+        score=correct_count,
+        results=results,
+        total=len(tasks)
+    )
 
 @app.route('/upload_avatar', methods=['POST'])
 @login_required
