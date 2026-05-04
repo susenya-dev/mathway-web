@@ -22,23 +22,33 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id)) 
+    return User.query.get(int(user_id))
 
 
 @app.route('/')
 def home():
-    if len(UserTaskUp.query.filter_by(user_name=current_user.username).all()) > 0:
-        tasks = UserTaskUp.query.filter_by(user_name=current_user.username).all()
-        variant_ids = list(set(t.variant_id for t in tasks))
-        return render_template("index.html", topics=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                               self_vr=variant_ids)
-    else:
-        return render_template("index.html", topics=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], self_vr=[])
+    if current_user.is_authenticated:
+        user_tasks = UserTaskUp.query.filter_by(
+            user_name=current_user.username
+        ).all()
+
+        variant_ids = list(set(t.variant_id for t in user_tasks))
+
+        return render_template(
+            "index.html", topics=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            self_vr=variant_ids
+        )
+
+    return render_template(
+        "index.html", topics=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], self_vr=[]
+    )
+
 
 @app.route('/profile')
 def profile():
     """Шаблон профиля"""
     return render_template("profile.html")
+
 
 @app.route('/logout')
 def logout():
@@ -46,11 +56,13 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/self_variant_main/<variant_id>', methods=['GET' ])
+
+@app.route('/self_variant_main/<variant_id>', methods=['GET'])
 @login_required
 def self_variant_main(variant_id):
     tasks = UserTaskUp.query.filter_by(user_name=current_user.username, variant_id=variant_id).all()
     return render_template('variant.html', tasks=tasks, var_num=variant_id)
+
 
 @app.route('/self_variant', methods=['GET', 'POST'])
 @login_required
@@ -90,6 +102,7 @@ def self_variant():
         return redirect(url_for('profile'))
 
     return render_template("self_variant.html")
+
 
 @app.route('/upload_avatar', methods=['POST'])
 @login_required
@@ -183,6 +196,7 @@ def test(topic):
     tasks = [t for t in tasks if int(t['topic']) == topic]
 
     return render_template('test.html', tasks=tasks, topic=topic)
+
 
 @app.route('/api/tasks')
 def api_tasks():
@@ -283,11 +297,11 @@ def check(topic):
             'is_correct': correct
         })
 
-
     current_user.count_task += correct_count
     db.session.commit()
 
     return render_template('result.html', score=correct_count, results=res)
+
 
 if __name__ == '__main__':
     app.run(port=8080)
