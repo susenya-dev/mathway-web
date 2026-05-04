@@ -4,8 +4,7 @@
 
 <h2>Вариант {{ var_num }}</h2>
 
-<form method="POST" action="/check_self_variant/{{ var_num }}">
-
+<form method="POST" action="{{ url_for('check_self_variant', variant_id=var_num) }}">
     {% for task in tasks %}
     <div class="card p-3 mb-3">
         <p><b>Задание {{ loop.index }}</b></p>

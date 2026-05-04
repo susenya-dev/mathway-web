@@ -103,6 +103,19 @@ def self_variant():
 
     return render_template("self_variant.html")
 
+@app.route('/open_variant', methods=['GET'])
+@login_required
+def open_variant():
+    variant_id = request.args.get('variant_id')
+
+    tasks = UserTaskUp.query.filter_by(variant_id=variant_id).all()
+
+    if not tasks:
+        return render_template('404.html')
+
+    return render_template('variant_s.html', tasks=tasks, var_num=variant_id)
+
+
 @app.route('/check_self_variant/<variant_id>', methods=['POST'])
 @login_required
 def check_self_variant(variant_id):
