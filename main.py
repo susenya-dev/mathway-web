@@ -120,7 +120,6 @@ def open_variant():
 @login_required
 def check_self_variant(variant_id):
     tasks = UserTaskUp.query.filter_by(
-        user_name=current_user.username,
         variant_id=variant_id
     ).all()
 
