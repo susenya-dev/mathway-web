@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Подтверждение почты</h2>
+
+<p>Мы отправили код на вашу почту{% if email %}: <b>{{ email }}</b>{% endif %}</p>
+
+<form method="POST">
+    <div class="mb-3">
+        <label>Код подтверждения</label>
+        <input type="text" name="code" class="form-control" required>
+    </div>
+
+    <button class="btn btn-primary">Подтвердить</button>
+</form>
+
+{% if error %}
+    <div class="alert alert-danger mt-3">
+        {{ error }}
+    </div>
+{% endif %}
+
+{% endblock %}

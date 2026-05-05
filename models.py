@@ -32,3 +32,15 @@ class UserTaskUp(db.Model):
     answer = db.Column(db.String(100))
     topic = db.Column(db.Integer)
     image_url = db.Column(db.String(200))
+
+class EmailCode(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120))
+    code = db.Column(db.String(10))
+
+class TempUser(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100))
+    email = db.Column(db.String(120))
+    password = db.Column(db.String(200))
+    code = db.Column(db.String(10))

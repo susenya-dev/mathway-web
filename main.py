@@ -1,23 +1,41 @@
+import uuid
+import os
 import requests
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-from models import db, User, Task, UserTaskUp
+from models import db, User, Task, UserTaskUp, TempUser, EmailCode
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from fnmatch import fnmatch
-
-import uuid
-import os
+from flask_mail import Mail, Message
+import random
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SECRET_KEY'] = 'secretkey'
 
+app.config['MAIL_SERVER'] = "smtp.yandex.ru"
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = "tchelkakoe-to@yandex.ru"
+app.config['MAIL_PASSWORD'] = "rerbcxszmjjshdyz"
+
+mail = Mail(app)
 db.init_app(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+
+def generate_code():
+    return str(random.randint(100000, 999999))
+
+
+def send_code(email, code):
+    msg = Message("Код подтвержения", sender=app.config["MAIL_USERNAME"], recipients=[email])
+    msg.body = f"Вход в систему MathWay. Никому не сообщайте код!\n Ваш код: {code}"
+    mail.send(msg)
 
 
 @login_manager.user_loader
@@ -103,6 +121,7 @@ def self_variant():
 
     return render_template("self_variant.html")
 
+
 @app.route('/open_variant', methods=['GET'])
 @login_required
 def open_variant():
@@ -154,6 +173,7 @@ def check_self_variant(variant_id):
         total=len(tasks)
     )
 
+
 @app.route('/upload_avatar', methods=['POST'])
 @login_required
 def upload_avatar():
@@ -191,23 +211,65 @@ def register():
 
         if User.query.filter_by(username=username).first():
             return render_template("register.html", error="Пользователь уже существует", username=username)
+
         if confirm_password != password:
             return render_template("register.html", error="Пароли не совпадают", username=username)
+
         if len(password) < 6:
             return render_template("register.html", error="Пароль слишком короткий", username=username)
-        if User.query.filter_by(email=email).first():
-            return render_template("register.html", error="Электронная почта уже занята", username=username)
-        if not fnmatch(email, "*@*.*"):
-            return render_template("register.html", error="Неправильная запись почты", username=username)
-        hashed_password = generate_password_hash(password)
 
-        user = User(username=username, password=hashed_password, email=email)
-        db.session.add(user)
+        if User.query.filter_by(email=email).first():
+            return render_template("register.html", error="Почта занята", username=username)
+
+        if not fnmatch(email, "*@*.*"):
+            return render_template("register.html", error="Неверный email", username=username)
+
+        code = generate_code()
+
+        temp = TempUser(
+            username=username,
+            email=email,
+            password=generate_password_hash(password),
+            code=code
+        )
+
+        db.session.add(temp)
         db.session.commit()
 
-        return redirect(url_for("home"))
+        send_code(email, code)
 
-    return render_template('register.html')
+        return redirect(url_for("verify", email=email))
+
+    return render_template("register.html")
+
+
+@app.route("/verify", methods=["GET", "POST"])
+def verify():
+    email = request.args.get("email")
+
+    if request.method == "POST":
+        code = request.form["code"]
+
+        temp = TempUser.query.filter_by(email=email).first()
+
+        if temp and temp.code == code:
+            user = User(
+                username=temp.username,
+                email=temp.email,
+                password=temp.password
+            )
+
+            db.session.add(user)
+            db.session.delete(temp)
+            db.session.commit()
+
+            login_user(user)
+
+            return redirect(url_for("home"))
+
+        return render_template("verify.html", error="Неверный код", email=email)
+
+    return render_template("verify.html", email=email)
 
 
 @app.route('/login', methods=['GET', 'POST'])
