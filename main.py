@@ -81,6 +81,12 @@ def self_variant_main(variant_id):
     tasks = UserTaskUp.query.filter_by(user_name=current_user.username, variant_id=variant_id).all()
     return render_template('variant_s.html', tasks=tasks, var_num=variant_id)
 
+@app.route('/rating')
+@login_required
+def rating():
+    users = User.query.order_by(User.count_task.desc()).all()
+    return render_template("rate.html", users=users)
+
 
 @app.route('/self_variant', methods=['GET', 'POST'])
 @login_required

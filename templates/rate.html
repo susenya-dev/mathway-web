@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-5">
+    <h2 class="text-center mb-4">Рейтинг пользователей</h2>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover align-middle text-center">
+                <thead class="table-dark">
+                <tr>
+                    <th>№</th>
+                    <th></th>
+                    <th>Пользователь</th>
+                    <th>Решено задач</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>
+                        {{ loop.index }}
+                    </td>
+                    <td>
+                        <img src="{{ url_for('static', filename=user.avatar or 'avatars/none_avatar.jpg') }}"
+                             onerror="this.src='{{ url_for('static', filename='avatars/none_avatar.jpg') }}'"
+                             alt="avatar"
+
+                             width="70" height="70">
+                    </td>
+                    <td class="fw-semibold">
+                        {{ user.username }}
+                    </td>
+                    <td>
+                        {{ user.count_task }}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
