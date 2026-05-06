@@ -65,7 +65,13 @@ def home():
 @app.route('/profile')
 def profile():
     """Шаблон профиля"""
-    return render_template("profile.html")
+    users = User.query.order_by(User.count_task.desc()).all()
+    rank = None
+    for i, user in enumerate(users, 1):
+        if user.id == current_user.id:
+            rank = i
+            break
+    return render_template("profile.html",rank=rank)
 
 
 @app.route('/logout')
