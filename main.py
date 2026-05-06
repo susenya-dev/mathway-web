@@ -29,10 +29,12 @@ login_manager.login_view = 'login'
 
 
 def generate_code():
+    """генерация рандомного verify code для входа по почте"""
     return str(random.randint(100000, 999999))
 
 
 def send_code(email, code):
+    """отправка писем"""
     msg = Message("Код подтвержения", sender=app.config["MAIL_USERNAME"], recipients=[email])
     msg.body = f"Вход в систему MathWay. Никому не сообщайте код!\n Ваш код: {code}"
     mail.send(msg)
@@ -40,11 +42,13 @@ def send_code(email, code):
 
 @login_manager.user_loader
 def load_user(user_id):
+    """залогиненный юзер"""
     return User.query.get(int(user_id))
 
 
 @app.route('/')
 def home():
+    """домашняя страница (варианты)"""
     if current_user.is_authenticated:
         user_tasks = UserTaskUp.query.filter_by(
             user_name=current_user.username
@@ -84,6 +88,7 @@ def logout():
 @app.route('/self_variant_main/<variant_id>', methods=['GET'])
 @login_required
 def self_variant_main(variant_id):
+    """открытие пользовательского варианта по ключу"""
     tasks = UserTaskUp.query.filter_by(user_name=current_user.username, variant_id=variant_id).all()
     return render_template('variant_s.html', tasks=tasks, var_num=variant_id)
 
@@ -91,6 +96,7 @@ def self_variant_main(variant_id):
 @app.route('/rating')
 @login_required
 def rating():
+    """страница с рейтингом"""
     users = User.query.order_by(User.count_task.desc()).all()
     return render_template("rate.html", users=users)
 
@@ -98,6 +104,7 @@ def rating():
 @app.route('/self_variant', methods=['GET', 'POST'])
 @login_required
 def self_variant():
+    """страница для создания собственного варианта"""
     if request.method == 'POST':
 
         variant_id = uuid.uuid4().hex
@@ -138,6 +145,7 @@ def self_variant():
 @app.route('/open_variant', methods=['GET'])
 @login_required
 def open_variant():
+    """открытие варианта по ключу"""
     variant_id = request.args.get('variant_id')
 
     tasks = UserTaskUp.query.filter_by(variant_id=variant_id).all()
@@ -151,6 +159,7 @@ def open_variant():
 @app.route('/check_self_variant/<variant_id>', methods=['POST'])
 @login_required
 def check_self_variant(variant_id):
+    """проверка вариантов пользователей"""
     tasks = UserTaskUp.query.filter_by(
         variant_id=variant_id
     ).all()
@@ -218,6 +227,7 @@ def upload_avatar():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    """регистрация"""
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
@@ -260,6 +270,7 @@ def register():
 
 @app.route("/verify", methods=["GET", "POST"])
 def verify():
+    """верификация"""
     email = request.args.get("email")
 
     if request.method == "POST":
@@ -289,6 +300,7 @@ def verify():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """логин"""
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -304,19 +316,9 @@ def login():
     return render_template('login.html')
 
 
-# @app.route('/test')
-# def test():
-#     tasks = Task.query.all()
-#     return render_template('test.html', tasks=tasks)
-
-# @app.route('/test/<int:topic>')
-# def test(topic):
-#     tasks = Task.query.filter_by(topic=topic).all()
-#     return render_template('test.html', tasks=tasks, topic=topic)
-
-
 @app.route('/test/<int:topic>')
 def test(topic):
+    """варианты из одного типа заданий"""
     res = requests.get('http://127.0.0.1:8080/api/tasks')
     tasks = res.json()
 
@@ -327,6 +329,7 @@ def test(topic):
 
 @app.route('/api/tasks')
 def api_tasks():
+    """API вариантов из одного типа заданий"""
     tasks = Task.query.all()
 
     result = []
@@ -404,6 +407,7 @@ def check_variant(var_num):
 @app.route('/check/<int:topic>', methods=['POST'])
 @login_required
 def check(topic):
+    """проверка вариантов"""
     tasks = Task.query.filter_by(topic=topic).all()
 
     correct_count = 0
