@@ -176,6 +176,8 @@ def check_self_variant(variant_id):
         })
 
     current_user.count_task += correct_count
+    if correct_count == 12:
+        current_user.solved_var += 1
     db.session.commit()
 
     return render_template(
@@ -390,6 +392,8 @@ def check_variant(var_num):
         })
 
     current_user.count_task += correct_count
+    if correct_count == 12:
+        current_user.solved_var += 1
     db.session.commit()
 
     return render_template('result.html', score=correct_count, results=results,
