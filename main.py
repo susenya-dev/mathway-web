@@ -71,7 +71,7 @@ def profile():
         if user.id == current_user.id:
             rank = i
             break
-    return render_template("profile.html",rank=rank)
+    return render_template("profile.html", rank=rank)
 
 
 @app.route('/logout')
@@ -86,6 +86,7 @@ def logout():
 def self_variant_main(variant_id):
     tasks = UserTaskUp.query.filter_by(user_name=current_user.username, variant_id=variant_id).all()
     return render_template('variant_s.html', tasks=tasks, var_num=variant_id)
+
 
 @app.route('/rating')
 @login_required
